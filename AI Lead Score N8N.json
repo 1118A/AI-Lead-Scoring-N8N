@@ -1,0 +1,443 @@
+{
+  "name": "AI Lead Score",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -208,
+        -16
+      ],
+      "id": "8cbe2340-a778-4862-a0a1-bd695b090697",
+      "name": "Telegram Trigger",
+      "webhookId": "301784e3-2977-4dab-bf34-f85b623a14b0",
+      "credentials": {
+        "telegramApi": {
+          "id": "E70AQMJohRgnlkq7ad",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $input.first().json.message.text\n\n// Check if text exists and looks like JSON before trying to parse\nif (text && (text.startsWith('{') || text.startsWith('['))) {\n  try {\n    const lead = JSON.parse(text);\n    return { json: lead };\n  } catch (e) {\n    // If it looks like JSON but fails (syntax error), return the error as data instead of crashing\n    return { json: { error: \"Invalid JSON syntax\", raw: text } };\n  }\n}\n\n// If it's not JSON, just pass the raw text through or ignore it\nreturn { json: { isPlainText: true, content: text } };\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        -16
+      ],
+      "id": "afe67c59-3297-4a0d-bd3f-0c0d8ec37f39",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "664f21bf-8eb1-41eb-9907-e699beab3b2f",
+              "name": "email",
+              "value": "={{ $json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "d5779a46-0e5f-4711-9db2-d35973da3193",
+              "name": "visits",
+              "value": "={{$json.visits || \"N/A\"}}",
+              "type": "number"
+            },
+            {
+              "id": "2bb42f67-53c3-4e94-8427-f6c764f9dbc0",
+              "name": "pages",
+              "value": "={{$json.pages || 0}}",
+              "type": "number"
+            },
+            {
+              "id": "dd8f3c55-52fd-4712-9021-534d6314f206",
+              "name": "company",
+              "value": "={{$json.company || \"Unknown\"}}",
+              "type": "string"
+            },
+            {
+              "id": "abdad65f-3e02-42ad-bf66-e1c1a86263cf",
+              "name": "job_title",
+              "value": "={{$json.job_title || \"Unknown\"}}",
+              "type": "string"
+            },
+            {
+              "id": "bf4fde2b-bd7c-4f57-8713-b8bac46f2ca5",
+              "name": "utm_source",
+              "value": "={{$json.utm_source || \"Direct\"}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        192,
+        -16
+      ],
+      "id": "d22f373a-7093-47e6-b24f-be82eac08a9b",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1m1G8JQ7iliFE6omC4HyxqpXbcrrpCfQVUGSPmY_dfqU/edit?gid=0#gid=0",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Sheet1",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "email": "={{ $json.email }}",
+            "visits": "={{ $json.visits }}",
+            "pages": "={{ $json.pages }}",
+            "company": "={{ $json.company }}",
+            "job_title": "={{ $json.job_title }}",
+            "utm_source": "={{ $json.utm_source }}"
+          },
+          "matchingColumns": [
+            "email"
+          ],
+          "schema": [
+            {
+              "id": "row_id",
+              "displayName": "row_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "visits",
+              "displayName": "visits",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "pages",
+              "displayName": "pages",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "company",
+              "displayName": "company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "job_title",
+              "displayName": "job_title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "utm_source",
+              "displayName": "utm_source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        384,
+        -16
+      ],
+      "id": "2cf0888c-bef5-4cb0-a508-485d20a71418",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleApi": {
+          "id": "Okc9FfPklds4Xu6pCB",
+          "name": "Google Service Account account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{\n  json: {\n    ...$json,\n    prompt: `You are a lead scoring AI.\n\nScore this lead from 0 to 100 and classify:\n\nEmail: $input.first().json.email\nCompany: $input.first().json.company\nJob Title: $input.first().json.job_title\nVisits: $input.first().json.visits\nPages:$input.first().json.pages\nSource:$input.first().json.utm_source\nReturn ONLY JSON:\n{\n  \"score\": number,\n  \"bucket\": \"Hot | Warm | Cold\",\n  \"reason\": \"short explanation\"\n}`\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        592,
+        -16
+      ],
+      "id": "9f0facff-9e29-461f-9120-2dd1fb221681",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Email: {{$json.email}}\nCompany: {{$json.company}}\nJob Title: {{$json.job_title}}\nVisits: {{$json.visits}}\nPages: {{$json.pages}}\nSource: {{$json.utm_source}}",
+        "options": {
+          "systemMessage": "You are a lead scoring AI.\n\nAnalyze the lead and return ONLY valid JSON:\n\n{\n  \"score\": number (0-100),\n  \"bucket\": \"Hot | Warm | Cold\",\n  \"reason\": \"short explanation\"\n}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        784,
+        -16
+      ],
+      "id": "76756470-1e54-4a56-8286-f0bb93a55ead",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-safeguard-20b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        704,
+        176
+      ],
+      "id": "87a13653-95ec-49cf-9dd6-d090683b2cb6",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "fEawCBsjs28bJ4",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "aakashbambhaniya06@gmail.com",
+        "toEmail": "bambhaniyaaakash02@gmail.com",
+        "subject": "Hot Lead🔥💥",
+        "html": "=<div style=\"font-family: Arial; padding: 10px;\">\n  <h2 style=\"color:#2c3e50;\">📊 New Lead Captured</h2>\n\n  <h3>👤 Contact Information</h3>\n  <p><b>Email:</b>{{ $('Code in JavaScript1').item.json.email }} </p>\n  <p><b>Company:</b>{{ $('Code in JavaScript1').item.json.company }} </p>\n  <p><b>Job Title:</b>{{ $('Code in JavaScript1').item.json.job_title }} </p>\n\n  <h3>📈 Engagement Details</h3>\n  <p><b>Visits:</b>{{ $('Code in JavaScript1').item.json.visits }} </p>\n  <p><b>Pages:</b>{{ $('Code in JavaScript1').item.json.pages }}</p>\n  <p><b>Source:</b>{{ $('Code in JavaScript1').item.json.utm_source }}</p>\n\n  <h3>🧠 AI Insight</h3>\n  <p><b>Score:</b> {{$json.score}}</p>\n  <p><b>Bucket:</b> {{$json.bucket}}</p>\n  <p><b>Summary:</b> {{$json.reason}}</p>\n\n  <hr>\n\n  <p style=\"color:green;\"><b>Recommended Action:</b> Follow up within 24–48 hours.</p>\n\n  <p>— AI Lead System 🚀</p>\n</div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1568,
+        -32
+      ],
+      "id": "f796a041-0072-4224-a80b-2dc2ccf15da2",
+      "name": "Send an Email",
+      "webhookId": "ccb0f37d-254c-467d-80c3-41c9844d62c8",
+      "credentials": {
+        "smtp": {
+          "id": "oS449beXDsMaeXxD",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $json.output;\n\nlet parsed;\n\ntry {\n  parsed = JSON.parse(raw);\n} catch (e) {\n  parsed = {\n    score: 0,\n    bucket: \"Unknown\",\n    reason: raw\n  };\n}\n\nreturn [{\n  json: {\n    ...$json,\n    ...parsed\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1104,
+        -16
+      ],
+      "id": "da6960fd-a278-4e85-b4fe-9231771c9567",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "6bd70a55-60ed-4d83-8f85-737678244bd0",
+              "leftValue": "={{ $json.score }}",
+              "rightValue": 80,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1328,
+        -16
+      ],
+      "id": "d5ae85b3-99ba-47bd-9068-8cd1125663b9",
+      "name": "If"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send an Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "versionId": "06cc201a-c36f-48c8-8cc1-be48340eefc1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "639837275ab431961d8b9601294f0ce10f82616d528a265d115b504e91efd038"
+  },
+  "id": "6RvzVgT1vFwWg9Q0",
+  "tags": []
+}
